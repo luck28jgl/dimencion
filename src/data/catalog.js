@@ -49,7 +49,11 @@ const categoryConfig = [
   },
 ]
 
-const imageModules = import.meta.glob('../assets/*/*.{jpeg,jpg,png,webp}', { eager: true, as: 'url' })
+const imageModules = import.meta.glob('../assets/*/*.{jpeg,jpg,png,webp}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
 
 const categoryFolders = categoryConfig.reduce((map, category) => {
   map[category.folder] = category
