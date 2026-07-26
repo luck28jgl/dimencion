@@ -56,6 +56,7 @@
             <img :src="orderTargetProduct.image" :alt="orderTargetProduct.title" class="order-modal-image" />
             <div class="order-modal-info">
               <strong>{{ orderTargetProduct.title }}</strong>
+              <span v-if="props.sectionLabel" class="order-modal-section">{{ props.sectionLabel }}</span>
               <p>Confirma para abrir WhatsApp con el nombre de la joya.</p>
             </div>
           </div>
@@ -118,6 +119,10 @@ const props = defineProps({
     type: String,
     default: 'Pedir esta joya',
   },
+  sectionLabel: {
+    type: String,
+    default: '',
+  },
 })
 
 const emit = defineEmits(['close', 'update:currentIndex', 'order'])
@@ -169,11 +174,15 @@ const closeOrderModal = () => {
   isOrderModalOpen.value = false
 }
 
+const orderMessageName = computed(() => {
+  const name = orderTargetProduct.value.title || 'esta joya'
+  return props.sectionLabel ? `${name} (${props.sectionLabel})` : name
+})
+
 const confirmOrder = () => {
-  const product = orderTargetProduct.value
   isOrderModalOpen.value = false
   window.open(
-    createWhatsAppProductLink(product.title || 'esta joya'),
+    createWhatsAppProductLink(orderMessageName.value),
     '_blank',
     'noopener,noreferrer',
   )
@@ -418,6 +427,12 @@ const showPrevious = () => {
 
 .order-modal-info strong {
   font-size: 1rem;
+}
+
+.order-modal-section {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold);
 }
 
 .order-modal-actions {

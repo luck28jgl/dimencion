@@ -53,6 +53,7 @@
       :title="currentSlide.title"
       order-enabled
       order-button-text="Pedir esta joya"
+      :section-label="props.sectionLabel"
       @close="isLightboxOpen = false"
       @update:currentIndex="(index) => currentIndex.value = index"
     />
@@ -72,6 +73,10 @@ const props = defineProps({
   hasOverlay: {
     type: Boolean,
     default: true,
+  },
+  sectionLabel: {
+    type: String,
+    default: '',
   },
 })
 

@@ -49,6 +49,7 @@
       :alt="product.name"
       :title="product.name"
       order-enabled
+      :section-label="props.sectionLabel"
       @close="isLightboxOpen = false"
       @update:currentIndex="(index) => lightboxIndex.value = index"
     />
@@ -64,6 +65,7 @@
           <img :src="orderTargetProduct.value?.image || product.image" :alt="orderTargetProduct.value?.name || product.name" class="modal-preview-image" />
           <div class="modal-product-info">
             <strong>{{ orderTargetProduct.value?.name || product.name }}</strong>
+            <span v-if="props.sectionLabel" class="modal-section-label">{{ props.sectionLabel }}</span>
             <p class="modal-preview-text">Se enviará un mensaje de pedido con el nombre de esta joya.</p>
           </div>
         </div>
@@ -94,6 +96,10 @@ const props = defineProps({
   startIndex: {
     type: Number,
     default: 0,
+  },
+  sectionLabel: {
+    type: String,
+    default: '',
   },
 })
 
@@ -134,7 +140,10 @@ const openWhatsAppModal = () => {
 const confirmWhatsApp = () => {
   isConfirmOpen.value = false
   const targetProduct = orderTargetProduct.value || props.product
-  window.open(createWhatsAppProductLink(targetProduct.name), '_blank', 'noopener,noreferrer')
+  const name = props.sectionLabel
+    ? `${targetProduct.name} (${props.sectionLabel})`
+    : targetProduct.name
+  window.open(createWhatsAppProductLink(name), '_blank', 'noopener,noreferrer')
 }
 
 const closeWhatsAppModal = () => {
@@ -350,6 +359,12 @@ h3 {
 .modal-preview-text {
   margin: 0;
   color: var(--text-muted);
+}
+
+.modal-section-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--gold);
 }
 
 .modal-actions {

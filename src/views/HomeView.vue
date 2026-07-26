@@ -10,7 +10,7 @@
         </p>
         <a href="#selection" class="hero-button">Ver colección</a>
       </div>
-      <HeroCarousel :slides="heroSlides" />
+      <HeroCarousel :slides="heroSlides" section-label="del carrusel de inicio" />
     </section>
 
     <section class="section-intro" id="selection">
@@ -37,10 +37,11 @@
           :product="product"
           :slides="featuredProducts"
           :start-index="index"
+          section-label="de la sección de piezas destacadas"
         />
       </div>
       <div class="featured-carousel">
-        <HeroCarousel v-if="featuredSlides.length" :slides="featuredSlides" :has-overlay="false" />
+        <HeroCarousel v-if="featuredSlides.length" :slides="featuredSlides" :has-overlay="false" section-label="de la sección de piezas destacadas" />
       </div>
     </section>
 
@@ -78,6 +79,7 @@
                 :product="currentPreviewProduct(category)"
                 :slides="category.products"
                 :start-index="previewIndexes[category.slug]"
+                :section-label="`de lo más vendido — ${category.name}`"
               />
             </div>
 

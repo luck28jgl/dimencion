@@ -23,6 +23,7 @@
           :product="product"
           :slides="category.products"
           :start-index="index"
+          :section-label="`del catálogo de ${category.name}`"
         />
       </div>
       <div v-else class="empty-state">
