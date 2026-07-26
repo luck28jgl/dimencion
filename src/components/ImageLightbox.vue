@@ -39,7 +39,7 @@
           ›
         </button>
       </figure>
-      <div class="swipe-hint-overlay">
+      <div v-if="showSwipeHint" class="swipe-hint-overlay">
         <video
           class="swipe-hint-video"
           :src="swipeHintVideo"
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 import swipeHintVideo from '../assets/deslizar a la izquierda.mp4'
 
 const props = defineProps({
@@ -108,6 +108,38 @@ const currentSlide = computed(() => {
   }
 })
 
+const showSwipeHint = ref(false)
+let hintTimeout = null
+
+const hideSwipeHint = () => {
+  clearTimeout(hintTimeout)
+  showSwipeHint.value = false
+}
+
+const showSwipeHintWithTimer = () => {
+  hideSwipeHint()
+  showSwipeHint.value = true
+  hintTimeout = setTimeout(() => {
+    showSwipeHint.value = false
+  }, 3000)
+}
+
+watch(
+  () => props.open,
+  (open) => {
+    if (open) {
+      showSwipeHintWithTimer()
+    } else {
+      hideSwipeHint()
+    }
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  hideSwipeHint()
+})
+
 const getClientX = (event) => {
   if (event.touches && event.touches.length === 1) {
     return event.touches[0].clientX
@@ -154,6 +186,7 @@ const dragThreshold = 60
 
 const showNext = () => {
   if (!props.slides.length) return
+  hideSwipeHint()
   const nextIndex = (activeIndex.value + 1) % props.slides.length
   activeIndex.value = nextIndex
   emit('update:currentIndex', nextIndex)
@@ -161,6 +194,7 @@ const showNext = () => {
 
 const showPrevious = () => {
   if (!props.slides.length) return
+  hideSwipeHint()
   const previousIndex = (activeIndex.value - 1 + props.slides.length) % props.slides.length
   activeIndex.value = previousIndex
   emit('update:currentIndex', previousIndex)
