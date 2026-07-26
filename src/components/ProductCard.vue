@@ -11,15 +11,14 @@
       <p class="description">{{ product.description }}</p>
 
       <div class="actions">
-        <a
-          :href="whatsappUrl"
+        <button
+          type="button"
           class="quote-button"
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label="Hacer pedido por WhatsApp"
+          @click="openWhatsAppModal"
+          aria-label="Confirmar pedido por WhatsApp"
         >
           Hacer pedido
-        </a>
+        </button>
 
         <div class="social-links">
           <a
@@ -52,6 +51,24 @@
       @close="isLightboxOpen = false"
       @update:currentIndex="(index) => lightboxIndex.value = index"
     />
+
+    <div class="modal-backdrop" v-if="isConfirmOpen" @click.self="closeWhatsAppModal">
+      <div class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+        <div class="modal-header">
+          <h3 id="modal-title">¿Deseas enviar este pedido por WhatsApp?</h3>
+          <button type="button" class="modal-close" @click="closeWhatsAppModal" aria-label="Cerrar modal">×</button>
+        </div>
+
+        <div class="modal-body">
+          <img :src="product.image" :alt="product.name" class="modal-preview-image" />
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="modal-secondary" @click="closeWhatsAppModal">Cancelar</button>
+          <button type="button" class="modal-primary" @click="confirmWhatsApp">Enviar a WhatsApp</button>
+        </div>
+      </div>
+    </div>
   </article>
 </template>
 
@@ -76,6 +93,7 @@ const props = defineProps({
 })
 
 const isLightboxOpen = ref(false)
+const isConfirmOpen = ref(false)
 const lightboxIndex = ref(props.startIndex)
 
 watch(
@@ -89,6 +107,10 @@ const lightboxSlides = computed(() => {
   return props.slides.length ? props.slides : [props.product]
 })
 
+const whatsappUrl = computed(() => createWhatsAppProductLink(props.product.name))
+const instagramLink = socialLinks.instagram
+const facebookLink = socialLinks.facebook
+
 const openLightbox = () => {
   if (props.slides.length) {
     const productIndex = props.slides.findIndex((item) => item.id === props.product.id)
@@ -99,9 +121,18 @@ const openLightbox = () => {
   isLightboxOpen.value = true
 }
 
-const whatsappUrl = createWhatsAppProductLink(props.product.name)
-const instagramLink = socialLinks.instagram
-const facebookLink = socialLinks.facebook
+const openWhatsAppModal = () => {
+  isConfirmOpen.value = true
+}
+
+const confirmWhatsApp = () => {
+  isConfirmOpen.value = false
+  window.open(whatsappUrl.value, '_blank', 'noopener,noreferrer')
+}
+
+const closeWhatsAppModal = () => {
+  isConfirmOpen.value = false
+}
 </script>
 
 <style scoped>
@@ -241,5 +272,110 @@ h3 {
 
 .social-links i {
   font-size: 0.95rem;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 12, 10, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 1000;
+}
+
+.confirm-modal {
+  width: min(480px, 100%);
+  background: #ffffff;
+  border-radius: 28px;
+  box-shadow: 0 32px 80px rgba(15, 12, 10, 0.18);
+  padding: 28px;
+  color: var(--text);
+}
+
+.modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.4;
+}
+
+.modal-close {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.modal-body {
+    display: grid;
+    /* grid-template-columns: auto 1fr; */
+    gap: 18px;
+    align-items: center;
+    margin-bottom: 24px;
+    justify-content: center;
+}
+
+.modal-preview-image {
+    width: 185px;
+    height: 136px;
+  object-fit: cover;
+  border-radius: 22px;
+  border: 1px solid rgba(60, 52, 52, 0.08);
+}
+
+.modal-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.modal-preview-text {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+  gap: 12px;
+}
+
+.modal-secondary,
+.modal-primary {
+  min-width: 120px;
+  padding: 12px 18px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.modal-secondary {
+  background: #f3f1ed;
+  color: var(--text);
+}
+
+.modal-primary {
+  background: var(--gold);
+  color: #fff;
+}
+
+.modal-secondary:hover {
+  background: #e7e3df;
+}
+
+.modal-primary:hover {
+  background: #b2945e;
 }
 </style>

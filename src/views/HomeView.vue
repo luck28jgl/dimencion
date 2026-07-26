@@ -74,6 +74,7 @@
           >
             <div class="preview-product-shell">
               <ProductCard
+                :key="currentPreviewProduct(category).id"
                 :product="currentPreviewProduct(category)"
                 :slides="category.products"
                 :start-index="previewIndexes[category.slug]"
@@ -402,8 +403,8 @@ const handlePreviewTouchEnd = (category) => {
 }
 
 .preview-nav {
-  width: 38px;
-  height: 38px;
+  width: 55px;
+  height: 55px;
   border: none;
   border-radius: 50%;
   background: var(--gold);
@@ -712,6 +713,7 @@ const handlePreviewTouchEnd = (category) => {
   .view-more-button,
   .overview-link {
     width: min(220px, 100%);
+    margin-top: 20px;
   }
 
   .site-footer {
