@@ -48,6 +48,7 @@
       :src="product.image"
       :alt="product.name"
       :title="product.name"
+      order-enabled
       @close="isLightboxOpen = false"
       @update:currentIndex="(index) => lightboxIndex.value = index"
     />
@@ -60,7 +61,11 @@
         </div>
 
         <div class="modal-body">
-          <img :src="product.image" :alt="product.name" class="modal-preview-image" />
+          <img :src="orderTargetProduct.value?.image || product.image" :alt="orderTargetProduct.value?.name || product.name" class="modal-preview-image" />
+          <div class="modal-product-info">
+            <strong>{{ orderTargetProduct.value?.name || product.name }}</strong>
+            <p class="modal-preview-text">Se enviará un mensaje de pedido con el nombre de esta joya.</p>
+          </div>
         </div>
 
         <div class="modal-actions">
@@ -107,7 +112,7 @@ const lightboxSlides = computed(() => {
   return props.slides.length ? props.slides : [props.product]
 })
 
-const whatsappUrl = computed(() => createWhatsAppProductLink(props.product.name))
+const orderTargetProduct = ref(props.product)
 const instagramLink = socialLinks.instagram
 const facebookLink = socialLinks.facebook
 
@@ -122,12 +127,14 @@ const openLightbox = () => {
 }
 
 const openWhatsAppModal = () => {
+  orderTargetProduct.value = props.product
   isConfirmOpen.value = true
 }
 
 const confirmWhatsApp = () => {
   isConfirmOpen.value = false
-  window.open(whatsappUrl.value, '_blank', 'noopener,noreferrer')
+  const targetProduct = orderTargetProduct.value || props.product
+  window.open(createWhatsAppProductLink(targetProduct.name), '_blank', 'noopener,noreferrer')
 }
 
 const closeWhatsAppModal = () => {

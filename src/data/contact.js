@@ -4,14 +4,10 @@ const defaultWhatsappText = 'Hola Dimensión quiero agendar el envío de una joy
 
 const createWhatsAppUrl = (phone, text) => {
   const encodedText = encodeURIComponent(text)
-  const browserFallback = encodeURIComponent(
-    `https://api.whatsapp.com/send?phone=${phone}&text=${encodedText}`,
-  )
 
-  if (typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)) {
-    return `intent://send?phone=${phone}&text=${encodedText}#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=${browserFallback};end`
-  }
-
+  // https://api.whatsapp.com/send abre la app de WhatsApp si está instalada
+  // (Android, iOS y escritorio) y cae al navegador si no. Es el formato oficial
+  // y válido en todas las plataformas.
   return `https://api.whatsapp.com/send?phone=${phone}&text=${encodedText}`
 }
 

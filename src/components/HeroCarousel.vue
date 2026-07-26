@@ -51,6 +51,8 @@
       :src="currentSlide.image || heroFallback"
       :alt="currentSlide.title"
       :title="currentSlide.title"
+      order-enabled
+      order-button-text="Pedir esta joya"
       @close="isLightboxOpen = false"
       @update:currentIndex="(index) => currentIndex.value = index"
     />
