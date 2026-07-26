@@ -1,6 +1,6 @@
 <template>
   <article class="product-card">
-    <button class="image-frame" type="button" :aria-label="`Ver imagen grande de ${product.name}`" @click="isLightboxOpen = true">
+    <button class="image-frame" type="button" :aria-label="`Ver imagen grande de ${product.name}`" @click="openLightbox">
       <img :src="product.image" :alt="product.name" />
       <span v-if="product.featured" class="badge">Destacado</span>
     </button>
@@ -44,16 +44,19 @@
 
     <ImageLightbox
       :open="isLightboxOpen"
+      :slides="lightboxSlides"
+      :currentIndex="lightboxIndex"
       :src="product.image"
       :alt="product.name"
       :title="product.name"
       @close="isLightboxOpen = false"
+      @update:currentIndex="(index) => lightboxIndex.value = index"
     />
   </article>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import ImageLightbox from './ImageLightbox.vue'
 import { createWhatsAppProductLink, socialLinks } from '../data/contact.js'
 
@@ -62,9 +65,40 @@ const props = defineProps({
     type: Object,
     required: true,
   },
+  slides: {
+    type: Array,
+    default: () => [],
+  },
+  startIndex: {
+    type: Number,
+    default: 0,
+  },
 })
 
 const isLightboxOpen = ref(false)
+const lightboxIndex = ref(props.startIndex)
+
+watch(
+  () => props.startIndex,
+  (value) => {
+    lightboxIndex.value = value
+  },
+)
+
+const lightboxSlides = computed(() => {
+  return props.slides.length ? props.slides : [props.product]
+})
+
+const openLightbox = () => {
+  if (props.slides.length) {
+    const productIndex = props.slides.findIndex((item) => item.id === props.product.id)
+    lightboxIndex.value = productIndex >= 0 ? productIndex : props.startIndex
+  } else {
+    lightboxIndex.value = 0
+  }
+  isLightboxOpen.value = true
+}
+
 const whatsappUrl = createWhatsAppProductLink(props.product.name)
 const instagramLink = socialLinks.instagram
 const facebookLink = socialLinks.facebook

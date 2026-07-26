@@ -17,7 +17,13 @@
       </div>
 
       <div v-if="category.products.length" class="product-grid">
-        <ProductCard v-for="product in category.products" :key="product.id" :product="product" />
+        <ProductCard
+          v-for="(product, index) in category.products"
+          :key="product.id"
+          :product="product"
+          :slides="category.products"
+          :start-index="index"
+        />
       </div>
       <div v-else class="empty-state">
         <p>No hay productos cargados todavía en esta categoría. Cuando agregues imágenes a la carpeta <strong>{{ category.folder }}</strong>, se mostrarán automáticamente aquí.</p>

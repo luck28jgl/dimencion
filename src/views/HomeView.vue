@@ -31,7 +31,13 @@
         <p>Esta selección muestra las primeras 4 piezas de todo el catálogo para que puedas empezar a explorar.</p>
       </div>
       <div class="product-grid desktop-featured-grid">
-        <ProductCard v-for="product in featuredProducts" :key="product.id" :product="product" />
+        <ProductCard
+          v-for="(product, index) in featuredProducts"
+          :key="product.id"
+          :product="product"
+          :slides="featuredProducts"
+          :start-index="index"
+        />
       </div>
       <div class="featured-carousel">
         <HeroCarousel v-if="featuredSlides.length" :slides="featuredSlides" :has-overlay="false" />
@@ -67,7 +73,11 @@
             @touchcancel="handlePreviewTouchEnd(category)"
           >
             <div class="preview-product-shell">
-              <ProductCard :product="currentPreviewProduct(category)" />
+              <ProductCard
+                :product="currentPreviewProduct(category)"
+                :slides="category.products"
+                :start-index="previewIndexes[category.slug]"
+              />
             </div>
 
             <div class="preview-controls">
