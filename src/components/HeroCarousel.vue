@@ -1,7 +1,20 @@
 <template>
   <section class="hero-carousel" v-if="slides.length">
-    <button class="carousel-image" type="button" :aria-label="`Ver imagen grande de ${currentSlide.title}`" @click="isLightboxOpen = true">
-        <img :src="currentSlide.image || heroFallback" :alt="currentSlide.title" />
+    <button
+      class="carousel-image"
+      type="button"
+      :aria-label="`Ver imagen grande de ${currentSlide.title}`"
+      @click="handleClick"
+      @pointerdown="handleTouchStart"
+      @pointermove="handleTouchMove"
+      @pointerup="handleTouchEnd"
+      @pointercancel="handleTouchEnd"
+      @touchstart="handleTouchStart"
+      @touchmove="handleTouchMove"
+      @touchend="handleTouchEnd"
+      @touchcancel="handleTouchEnd"
+    >
+      <img :src="currentSlide.image || heroFallback" :alt="currentSlide.title" />
       <div v-if="props.hasOverlay" class="carousel-overlay">
         <div>
           <span class="carousel-category">{{ currentSlide.title }}</span>
@@ -33,10 +46,13 @@
 
     <ImageLightbox
       :open="isLightboxOpen"
+      :slides="props.slides"
+      :currentIndex="currentIndex"
       :src="currentSlide.image || heroFallback"
       :alt="currentSlide.title"
       :title="currentSlide.title"
       @close="isLightboxOpen = false"
+      @update:currentIndex="(index) => currentIndex.value = index"
     />
   </section>
 </template>
@@ -59,6 +75,12 @@ const props = defineProps({
 
 const currentIndex = ref(0)
 const isLightboxOpen = ref(false)
+const touchStartX = ref(0)
+const touchCurrentX = ref(0)
+const isDragging = ref(false)
+const hasSwiped = ref(false)
+const dragThreshold = 60
+
 const currentSlide = computed(() => props.slides[currentIndex.value] || props.slides[0])
 let timer = null
 
@@ -68,6 +90,56 @@ const nextSlide = () => {
 
 const prevSlide = () => {
   currentIndex.value = (currentIndex.value - 1 + props.slides.length) % props.slides.length
+}
+
+const getClientX = (event) => {
+  if (event.touches && event.touches.length === 1) {
+    return event.touches[0].clientX
+  }
+
+  if (event.clientX !== undefined) {
+    return event.clientX
+  }
+
+  return null
+}
+
+const handleTouchStart = (event) => {
+  if (isDragging.value) return
+  const clientX = getClientX(event)
+  if (clientX === null) return
+  touchStartX.value = clientX
+  touchCurrentX.value = clientX
+  isDragging.value = true
+}
+
+const handleTouchMove = (event) => {
+  if (!isDragging.value) return
+  const clientX = getClientX(event)
+  if (clientX === null) return
+  touchCurrentX.value = clientX
+}
+
+const handleTouchEnd = () => {
+  if (!isDragging.value) return
+  const delta = touchCurrentX.value - touchStartX.value
+  isDragging.value = false
+  if (Math.abs(delta) > dragThreshold) {
+    hasSwiped.value = true
+    if (delta < 0) {
+      nextSlide()
+    } else {
+      prevSlide()
+    }
+  }
+}
+
+const handleClick = () => {
+  if (hasSwiped.value) {
+    hasSwiped.value = false
+    return
+  }
+  isLightboxOpen.value = true
 }
 
 onMounted(() => {
@@ -105,6 +177,8 @@ onUnmounted(() => {
   border: 1px solid rgba(201, 169, 110, 0.15);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,0.16);
   cursor: zoom-in;
+  touch-action: pan-y;
+  -webkit-user-drag: none;
 }
 
 .carousel-image img {

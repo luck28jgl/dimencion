@@ -55,7 +55,17 @@
             <p>{{ category.description }}</p>
           </div>
 
-          <div class="preview-slide">
+          <div
+            class="preview-slide"
+            @pointerdown="handlePreviewTouchStart(category, $event)"
+            @pointermove="handlePreviewTouchMove($event)"
+            @pointerup="handlePreviewTouchEnd(category)"
+            @pointercancel="handlePreviewTouchEnd(category)"
+            @touchstart="handlePreviewTouchStart(category, $event)"
+            @touchmove="handlePreviewTouchMove($event)"
+            @touchend="handlePreviewTouchEnd(category)"
+            @touchcancel="handlePreviewTouchEnd(category)"
+          >
             <div class="preview-product-shell">
               <ProductCard :product="currentPreviewProduct(category)" />
             </div>
@@ -147,7 +157,7 @@
 <script setup>
 import ProductCard from '../components/ProductCard.vue'
 import HeroCarousel from '../components/HeroCarousel.vue'
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import { categories, featuredProducts } from '../data/catalog.js'
 import { socialLinks } from '../data/contact.js'
 
@@ -171,6 +181,13 @@ const previewIndexes = reactive(
   Object.fromEntries(previewCategories.map((category) => [category.slug, 0])),
 )
 
+const previewSwipeState = reactive({
+  startX: 0,
+  currentX: 0,
+  activeSlug: null,
+  isDragging: false,
+})
+
 const currentPreviewProduct = (category) => category.products[previewIndexes[category.slug]]
 
 const showPrevious = (category) => {
@@ -181,6 +198,47 @@ const showPrevious = (category) => {
 const showNext = (category) => {
   const currentIndex = previewIndexes[category.slug]
   previewIndexes[category.slug] = (currentIndex + 1) % category.products.length
+}
+
+const getPreviewClientX = (event) => {
+  if (event.touches && event.touches.length === 1) {
+    return event.touches[0].clientX
+  }
+  if (event.clientX !== undefined) {
+    return event.clientX
+  }
+  return null
+}
+
+const handlePreviewTouchStart = (category, event) => {
+  if (previewSwipeState.isDragging) return
+  const clientX = getPreviewClientX(event)
+  if (clientX === null) return
+  previewSwipeState.activeSlug = category.slug
+  previewSwipeState.startX = clientX
+  previewSwipeState.currentX = clientX
+  previewSwipeState.isDragging = true
+}
+
+const handlePreviewTouchMove = (event) => {
+  if (!previewSwipeState.isDragging) return
+  const clientX = getPreviewClientX(event)
+  if (clientX === null) return
+  previewSwipeState.currentX = clientX
+}
+
+const handlePreviewTouchEnd = (category) => {
+  if (!previewSwipeState.isDragging || previewSwipeState.activeSlug !== category.slug) return
+  const delta = previewSwipeState.currentX - previewSwipeState.startX
+  previewSwipeState.isDragging = false
+  if (Math.abs(delta) > 56) {
+    if (delta < 0) {
+      showNext(category)
+    } else {
+      showPrevious(category)
+    }
+  }
+  previewSwipeState.activeSlug = null
 }
 </script>
 
@@ -307,6 +365,7 @@ const showNext = (category) => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  touch-action: pan-y;
 }
 
 .preview-product-shell {
