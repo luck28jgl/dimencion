@@ -30,8 +30,11 @@
         <h2>Piezas destacadas</h2>
         <p>Esta selección muestra las primeras 4 piezas de todo el catálogo para que puedas empezar a explorar.</p>
       </div>
-      <div class="product-grid">
+      <div class="product-grid desktop-featured-grid">
         <ProductCard v-for="product in featuredProducts" :key="product.id" :product="product" />
+      </div>
+      <div class="featured-carousel">
+        <HeroCarousel v-if="featuredSlides.length" :slides="featuredSlides" :has-overlay="false" />
       </div>
     </section>
 
@@ -45,13 +48,41 @@
       <div class="preview-grid">
         <article class="category-card" v-for="category in previewCategories" :key="category.slug">
           <div class="category-card__header">
-            <span class="section-tag">{{ category.name }}</span>
-            <h3>{{ category.name }}</h3>
+            <div class="chips"> 
+              <h3>{{ category.name }}</h3>
+              <span style="margin-left: 20px;" class="section-tag">{{ category.name }}</span>
+            </div>
             <p>{{ category.description }}</p>
           </div>
 
-          <div class="preview-products">
-            <ProductCard v-for="product in category.products.slice(0, 4)" :key="product.id" :product="product" />
+          <div class="preview-slide">
+            <div class="preview-product-shell">
+              <ProductCard :product="currentPreviewProduct(category)" />
+            </div>
+
+            <div class="preview-controls">
+              <button
+                class="preview-nav"
+                type="button"
+                @click="showPrevious(category)"
+                :aria-label="`Anterior producto en ${category.name}`"
+              >
+                ‹
+              </button>
+
+              <span class="preview-counter">
+                {{ previewIndexes[category.slug] + 1 }} / {{ category.products.length }}
+              </span>
+
+              <button
+                class="preview-nav"
+                type="button"
+                @click="showNext(category)"
+                :aria-label="`Siguiente producto en ${category.name}`"
+              >
+                ›
+              </button>
+            </div>
           </div>
 
           <router-link :to="`/categoria/${category.slug}`" class="view-more-button">
@@ -60,7 +91,26 @@
         </article>
       </div>
     </section>
-
+    <section class="bot-service-section">
+      <div class="bot-service-card">
+        <div>
+          <span class="section-tag">Chat 24/7</span>
+          <h2>Responde instantáneamente por WhatsApp</h2>
+          <p>
+            Nuestro asistente virtual está listo para recibir tu mensaje a cualquier hora.
+            Haz tu consulta, pide recomendaciones o confirma disponibilidad en minutos.
+          </p>
+        </div>
+        <a
+          class="bot-action"
+          :href="socialLinks.whatsapp"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Abrir WhatsApp
+        </a>
+      </div>
+    </section>
     <section class="category-overview-section">
       <div class="section-header section-header--center">
         <span class="section-tag">Catálogo completo</span>
@@ -86,9 +136,9 @@
         <p>Joyas de autor que celebran la belleza auténtica y el diseño femenino.</p>
       </div>
       <div class="footer-links">
-        <a href="https://www.instagram.com/dimension.jewelry" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a href="https://www.facebook.com/dimension.jewelry" target="_blank" rel="noopener noreferrer">Facebook</a>
-        <a href="https://wa.me/5211234567890" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+        <a :href="socialLinks.instagram" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a :href="socialLinks.facebook" target="_blank" rel="noopener noreferrer">Facebook</a>
+        <a :href="socialLinks.whatsapp" target="_blank" rel="noopener noreferrer">WhatsApp</a>
       </div>
     </footer>
   </div>
@@ -97,7 +147,9 @@
 <script setup>
 import ProductCard from '../components/ProductCard.vue'
 import HeroCarousel from '../components/HeroCarousel.vue'
+import { reactive } from 'vue'
 import { categories, featuredProducts } from '../data/catalog.js'
+import { socialLinks } from '../data/contact.js'
 
 const previewSlugs = ['anillos', 'pulseras', 'colgantes', 'arete-broquel']
 const previewCategories = categories.filter((category) => previewSlugs.includes(category.slug))
@@ -107,14 +159,41 @@ const heroSlides = categories.map((category) => ({
   image: category.products[0]?.image || '',
   count: category.products.length,
 }))
+
+const featuredSlides = featuredProducts.slice(0, 4).map((product) => ({
+  title: product.name,
+  caption: product.description,
+  image: product.image,
+  count: featuredProducts.length,
+}))
+
+const previewIndexes = reactive(
+  Object.fromEntries(previewCategories.map((category) => [category.slug, 0])),
+)
+
+const currentPreviewProduct = (category) => category.products[previewIndexes[category.slug]]
+
+const showPrevious = (category) => {
+  const currentIndex = previewIndexes[category.slug]
+  previewIndexes[category.slug] = (currentIndex - 1 + category.products.length) % category.products.length
+}
+
+const showNext = (category) => {
+  const currentIndex = previewIndexes[category.slug]
+  previewIndexes[category.slug] = (currentIndex + 1) % category.products.length
+}
 </script>
 
 <style scoped>
+.chips{
+      display: flex;
+    justify-content: space-between;
+}
 .home-view {
   width: 100vw;
   padding: 42px 42px 60px;
   display: grid;
-  gap: 52px;
+  gap: 5px;
 }
 
 .hero-section {
@@ -181,6 +260,111 @@ const heroSlides = categories.map((category) => ({
   background: #b3945d;
 }
 
+.bot-service-section {
+  padding: 28px 36px;
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.bot-service-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.bot-service-card h2 {
+  margin: 0 0 12px;
+  font-size: clamp(1.8rem, 2vw, 2.4rem);
+}
+
+.bot-service-card p {
+  margin: 0;
+  color: var(--text-muted);
+  max-width: 720px;
+}
+
+.bot-action {
+  min-width: 240px;
+  padding: 16px 24px;
+  border-radius: 18px;
+  background: var(--gold);
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bot-action:hover {
+  background: #b3945d;
+}
+
+.preview-slide {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.preview-product-shell {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 433px;
+}
+
+.preview-product-shell :deep(.product-card) {
+  height: 100%;
+}
+
+.preview-controls {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 999px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+}
+
+.preview-nav {
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: var(--gold);
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.preview-nav:hover {
+  transform: translateY(-2px);
+  background: #b3945d;
+}
+
+.preview-counter {
+  min-width: 56px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.preview-pager {
+  margin-top: 18px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+}
+
 .section-header {
   margin-bottom: 60px;
   margin-inline: auto;
@@ -228,6 +412,9 @@ const heroSlides = categories.map((category) => ({
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 28px;
 }
+.featured-carousel {
+  display: none;
+}
 .m-auto {
   margin: 0 auto;
 }
@@ -239,7 +426,7 @@ const heroSlides = categories.map((category) => ({
 
 .category-card {
   display: grid;
-  gap: 24px;
+  gap: 5px;
   padding: 24px;
   border-radius: 28px;
   border: 1px solid rgba(60, 52, 52, 0.08);
@@ -374,6 +561,11 @@ const heroSlides = categories.map((category) => ({
     box-shadow: none;
   }
 
+  .hero-copy,
+  .section-intro {
+    display: none;
+  }
+
   .section-intro,
   .featured-section,
   .preview-section,
@@ -393,10 +585,33 @@ const heroSlides = categories.map((category) => ({
     gap: 18px;
   }
 
+  .desktop-featured-grid {
+    display: none;
+  }
+
+  .featured-carousel {
+    display: block;
+  }
+
   .preview-products {
     grid-template-columns: 1fr;
     gap: 18px;
   }
+  .preview-product-shell :deep(.product-card) {
+    margin-top: 85px;
+  }
+  .preview-slide {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .preview-product-shell {
+    flex: 0 0 100%;
+    width: 100%;
+    order: 1;
+  }
+
 
   .category-card,
   .overview-card {

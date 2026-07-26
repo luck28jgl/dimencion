@@ -6,7 +6,7 @@
     </button>
 
     <div class="card-body">
-      <span class="category-label">{{ product.category }}</span>
+      <!-- <span class="category-label">{{ product.category }}</span> -->
       <h3>{{ product.name }}</h3>
       <p class="description">{{ product.description }}</p>
 
@@ -55,6 +55,7 @@
 <script setup>
 import { ref } from 'vue'
 import ImageLightbox from './ImageLightbox.vue'
+import { createWhatsAppProductLink, socialLinks } from '../data/contact.js'
 
 const props = defineProps({
   product: {
@@ -64,11 +65,9 @@ const props = defineProps({
 })
 
 const isLightboxOpen = ref(false)
-const whatsAppNumber = '5211234567890' // Cambia este número por tu número de WhatsApp real
-const whatsappText = `Hola, quisiera hacer pedido de este producto: ${props.product.name} a mi domicilio`
-const whatsappUrl = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent(whatsappText)}`
-const instagramLink = 'https://www.instagram.com/dimension.jewelry'
-const facebookLink = 'https://www.facebook.com/dimension.jewelry'
+const whatsappUrl = createWhatsAppProductLink(props.product.name)
+const instagramLink = socialLinks.instagram
+const facebookLink = socialLinks.facebook
 </script>
 
 <style scoped>
@@ -93,7 +92,7 @@ const facebookLink = 'https://www.facebook.com/dimension.jewelry'
   overflow: hidden;
   display: block;
   width: 100%;
-  min-height: 280px;
+  min-height: 230px;
   padding: 0;
   border: none;
   background: linear-gradient(180deg, rgba(201, 169, 110, 0.1), transparent);
@@ -126,10 +125,11 @@ const facebookLink = 'https://www.facebook.com/dimension.jewelry'
 }
 
 .card-body {
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    align-items: center;
 }
 
 .category-label {
@@ -157,11 +157,11 @@ h3 {
 }
 
 .actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .quote-button {

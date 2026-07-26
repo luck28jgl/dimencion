@@ -46,7 +46,7 @@
 
       <div class="social-icons">
         <a
-          href="https://www.instagram.com/dimension.jewelry"
+          :href="socialLinks.instagram"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Instagram DIMENSIÓN"
@@ -54,7 +54,7 @@
           <i class="fab fa-instagram"></i>
         </a>
         <a
-          href="https://www.facebook.com/dimension.jewelry"
+          :href="socialLinks.facebook"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="Facebook DIMENSIÓN"
@@ -62,7 +62,7 @@
           <i class="fab fa-facebook-f"></i>
         </a>
         <a
-          href="https://wa.me/5211234567890"
+          :href="socialLinks.whatsapp"
           target="_blank"
           rel="noopener noreferrer"
           aria-label="WhatsApp DIMENSIÓN"
@@ -79,6 +79,7 @@ import { computed, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import logo from '../assets/logo.png'
 import { categories } from '../data/catalog.js'
+import { socialLinks } from '../data/contact.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -100,7 +101,7 @@ const catalogItems = computed(() =>
 const menuItems = computed(() => [{ path: '/', label: 'Inicio' }, ...catalogItems.value])
 
 const selectedPath = computed(() => route.path)
-const selectedLabel = computed(() => menuItems.value.find((item) => item.path === selectedPath.value)?.label || 'CatÃ¡logo')
+const selectedLabel = computed(() => menuItems.value.find((item) => item.path === selectedPath.value)?.label || 'Catálogo')
 
 const goToCatalog = (path) => {
   isMenuOpen.value = false

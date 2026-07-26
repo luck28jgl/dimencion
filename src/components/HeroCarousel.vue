@@ -2,7 +2,7 @@
   <section class="hero-carousel" v-if="slides.length">
     <button class="carousel-image" type="button" :aria-label="`Ver imagen grande de ${currentSlide.title}`" @click="isLightboxOpen = true">
         <img :src="currentSlide.image || heroFallback" :alt="currentSlide.title" />
-      <div class="carousel-overlay">
+      <div v-if="props.hasOverlay" class="carousel-overlay">
         <div>
           <span class="carousel-category">{{ currentSlide.title }}</span>
           <p class="carousel-copy">{{ currentSlide.caption }}</p>
@@ -50,6 +50,10 @@ const props = defineProps({
   slides: {
     type: Array,
     required: true,
+  },
+  hasOverlay: {
+    type: Boolean,
+    default: true,
   },
 })
 
